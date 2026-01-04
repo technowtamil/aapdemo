@@ -1,6 +1,6 @@
 ---
 - name: Install and start Apache HTTPD
-  hosts: test
+  hosts: all
   tasks:
     - name: Ensure httpd package is present
       ansible.builtin.dnf:

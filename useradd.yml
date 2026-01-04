@@ -1,0 +1,47 @@
+---
+- name: Create a user account and Deploy SSH Keys
+  hosts: all
+
+  vars:
+    ssh_key_path: "sshkeys"
+
+  tasks:
+  - name: Add new users with SSH Key based auth
+    ansible.builtin.user:
+      name: "{{ item }}"
+      state: present
+      shell: /bin/bash
+      create_home: yes
+    loop: "{{ users }}"
+
+  - name: Ensure SSH directory exists
+    ansible.builtin.file:
+      path: "/home/{{ item }}"/.ssh"
+      state: directory
+      owner: "{{ item }}"
+      group: "{{ item }}"
+      mode: '0700'
+    loop: "{{ users }}"
+
+  - name: Deploy SSH Keys from GitHub
+    ansible.builtin.copy:
+      src: "{{ ssh_key_path}}/{{ item }}.pub"
+      dest: "/home/{{ item }}/.ssh/authorized_keys"
+      owner: "{{ item }}"
+      group: "{{ item }}"
+      mode: 0600
+    loop: "{{ users }}"
+
+  - name: Validate SSH key file exists
+    ansible.builtin.stat:
+      path: "{{ ssh_key_path}}/{{ item }}.pub"
+    register: key_check
+    loop: "{{ users }}"
+
+  - name: Fail if SSH Key is missing
+    ansible.builtin.fail:
+      msg: "Public key for user '{{ item.item }}' is missing in public_keys directory"
+    when: not item.stat.exists
+    loop: "{{ key_check }}"
+      
+      
