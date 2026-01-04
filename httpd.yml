@@ -1,5 +1,5 @@
--
--- name: Install and start Apache HTTPD
+--
+- name: Install and start Apache HTTPD
   hosts: web
   tasks:
     - name: Ensure httpd package is present
