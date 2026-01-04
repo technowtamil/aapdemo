@@ -3,7 +3,7 @@
   hosts: all
 
   vars:
-    ssh_key_path: "{{ playbook_dir }}/sshkeys"
+    ssh_key_path: "sshkeys"
 
   tasks:
   - name: Add new users with SSH Key based auth
