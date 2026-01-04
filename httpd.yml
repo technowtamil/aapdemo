@@ -1,4 +1,4 @@
---
+---
 - name: Install and start Apache HTTPD
   hosts: web
   tasks:
