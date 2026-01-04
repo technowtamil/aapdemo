@@ -36,6 +36,7 @@
     ansible.builtin.stat:
       path: "{{ ssh_key_path}}/{{ item }}.pub"
     register: key_check
+    delegate_to: localhost
     loop: "{{ users }}"
 
   - name: Fail if SSH Key is missing
