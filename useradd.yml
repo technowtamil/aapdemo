@@ -42,6 +42,4 @@
     ansible.builtin.fail:
       msg: "Public key for user '{{ item.item }}' is missing in public_keys directory"
     when: not item.stat.exists
-    loop: "{{ key_check }}"
-      
-      
+    loop: "{{ key_check.results }}"
