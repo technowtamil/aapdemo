@@ -1,0 +1,68 @@
+---
+- name: Install and configure Apache on Ubuntu and RHEL
+  hosts: all
+  become: true
+
+  vars:
+    web_git_repo: "https://github.com/technowtamil/my_profile.git"
+    web_root_rhel: /var/www/html
+    web_root_ubuntu: /var/www/html
+    web_tmp_dir: /tmp/my_profile
+
+  tasks:
+    - name: Gather OS facts
+      ansible.builtin.setup:
+
+    - name: Install git on RHEL
+      ansible.builtin.dnf:
+        name: git
+        state: present
+      when: ansible_facts['os_family'] == "RedHat"
+
+    - name: Install Apache on Ubuntu
+      ansible.builtin.apt:
+        name: apache2
+        state: present
+        update_cache: yes
+      when: ansible_facts['os_family'] == "Debian"
+
+    - name: Install Apache on RHEL
+      ansible.builtin.dnf:
+        name: httpd
+        state: present
+      when: ansible_facts['os_family'] == "RedHat"
+
+    - name: Clone website repository
+      ansible.builtin.git:
+        repo: "{{ web_git_repo }}"
+        dest: "{{ web_tmp_dir }}"
+        version: main
+        force: yes
+
+    - name: Deploy website on RHEL
+      ansible.builtin.copy:
+        src: "{{ web_tmp_dir }}/"
+        dest: "{{ web_root_rhel }}/"
+        remote_src: true
+      when: ansible_facts['os_family'] == "RedHat"
+
+    - name: Deploy website on Ubuntu
+      ansible.builtin.copy:
+        src: "{{ web_tmp_dir }}/"
+        dest: "{{ web_root_ubuntu }}/"
+        remote_src: true
+      when: ansible_facts['os_family'] == "Debian"
+
+    - name: Enable and restart Apache on RHEL
+      ansible.builtin.service:
+        name: httpd
+        state: restarted
+        enabled: true
+      when: ansible_facts['os_family'] == "RedHat"
+
+    - name: Enable and restart Apache on Ubuntu
+      ansible.builtin.service:
+        name: apache2
+        state: restarted
+        enabled: true
+      when: ansible_facts['os_family'] == "Debian"
